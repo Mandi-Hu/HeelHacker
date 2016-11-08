@@ -1,0 +1,198 @@
+<!-- 
+HeelHackers Project
+- Front End
+- Zhenwei Wang, Mandi Hu
+ -->
+<!DOCTYPE html>
+<html>
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script>
+
+// const link = 'http://filemanager-test.mybluemix.net';
+ const link = 'localhost:6001';
+ const socket = io.connect(link,{query:""});
+ const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+var NAME;
+var userLogin;
+var msgRec;
+
+socket.connect();
+    
+// log in
+function socket_conn(event){
+  userLogin = document.getElementById("logger").value;
+  socket.emit('login',{'username':userLogin,'password':''});
+//   var dummy = document.createElement("input");
+//   dummy.type = "BUTTON";
+//   dummy.value = userLogin+' joined!';
+//   container.appendChild(dummy);
+  container.appendChild(document.createElement("br"));
+  document.getElementById("username").innerHTML = "You are logging in now";
+  document.getElementById("msgButton").disabled = false;
+  document.getElementById("conn_button").disabled = true;
+  document.getElementById("disconn_button").disabled = false;  
+};
+
+// log off
+function socket_disconn(event){
+  socket.emit('logoff',{'username':userLogin});
+  document.getElementById("msgButton").disabled = true;
+  document.getElementById("conn_button").disabled = false;
+  document.getElementById("disconn_button").disabled = true;
+};
+
+function emitMessage(event){
+  var content = document.getElementById("msgtext").value;
+//   var msgRec = document.getElementById("recipient").value;
+//   console.log(NAME);
+  socket.emit('message',{'sender':userLogin,'recipient':NAME,'content':content});
+  if (NAME != "All" && NAME != userLogin) {
+  	var dummy = document.createElement("input");
+     	 dummy.type = "BUTTON";
+     	 dummy.value = userLogin+ ' said: '+ content;
+  	container.appendChild(dummy);
+  	container.appendChild(document.createElement("br"));
+  }
+  document.getElementById("msgtext").value = "";
+}
+
+// socket events
+
+socket.on('onlogin',function(response){
+  // do nothing for now, in future used for login validation
+});
+
+socket.on('userLogin',function(response){
+  document.getElementById("userList").innerHTML = "";
+  if (response.action =='login'){
+//     console.log("Connected!");
+//     console.log(JSON.stringify(response));
+    var ul = document.getElementById("userList");
+    var li = document.createElement("li");
+	li.setAttribute("class", "user");
+	li.setAttribute("data-value", "All");
+	
+	var img = document.createElement("img");
+	img.setAttribute("src", "/greendot.jpg");
+	img.setAttribute("width", "20");
+	img.setAttribute("height", "20");
+	
+	li.appendChild(img);
+    li.appendChild(document.createTextNode("All"));
+    ul.appendChild(li);
+    for (var key in response.userList) {
+    	var user = response.userList[key]; // to get object in userList
+    	var li = document.createElement("li");
+    	li.setAttribute("class", "user");
+    	li.setAttribute("data-value", key);
+    	var img = document.createElement("img");
+//     	console.log(user);
+// 		console.log(key);
+    	if (user.online == true) {
+			img.setAttribute("src", "/greendot.jpg");
+			img.setAttribute("width", "20");
+			img.setAttribute("height", "20");
+		}
+		else {
+			img.setAttribute("src", "/reddot.jpg");
+			img.setAttribute("width", "20");
+			img.setAttribute("height", "20");
+		}
+	    li.appendChild(img);
+    	li.appendChild(document.createTextNode(key));
+    	ul.appendChild(li);
+    }
+
+// select user to talk with
+  $(document).ready(function() {
+  	$(".user").click(function(){
+  		msgRec = "Chatting with ";
+  		msgRec += $(this).data('value');
+  		NAME = $(this).data('value');
+  		$("#username").text(msgRec);
+//   		$("#container").empty();
+  		console.log("clicked!");
+  		});
+  });	
+  }
+});
+
+socket.on('onmessage',function(response){
+    NAME = response.sender;
+    document.getElementById("username").innerHTML = "Chatting with " + NAME;
+    console.log(response.sender+' said: '+ response.content);
+    var dummy = document.createElement("input");
+    dummy.type = "BUTTON";
+    dummy.value = response.sender+' said: '+ response.content;
+    container.appendChild(dummy);
+    container.appendChild(document.createElement("br"));
+});
+
+socket.on('onlogoff',function(response){
+    var dummy = document.createElement("input");
+    dummy.type = "BUTTON";
+    dummy.value = response.username+' left!';
+    container.appendChild(dummy);
+    container.appendChild(document.createElement("br"));
+});
+</script>
+
+  <head>
+    <title>Messaging App endpoint</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  
+
+  <body>
+          <img src="/lexis.jpeg" height="100" width="100"/>
+          <input type = "text" id="logger" size=30>
+          <button class = "button" id ='conn_button' onclick="socket_conn()">Log in</button>
+          <button class = "button" id ='disconn_button' onclick="socket_disconn()" disabled=true>Log off</button>
+    <div id="main">
+
+          <div id = "chatBox">
+            <div id = "messageTitle">
+            	<div id = "username">Welcome to Messaging App Endpoint! Please log in.</div>
+            </div>
+          	<div id = "container"></div>
+          	<div id = "inputSend">
+          		<input type="text" id="msgtext" size = 90% style="height:35px">
+          		<button class="button" id='msgButton' onclick="emitMessage()" disabled=true>SEND</button>
+          		<button class="button">Save to Matters</button>
+<!-- 
+          		<select id='recipient'>
+            		<option value="">Everyone</option>
+            		<option value="Jack">Jack</option>
+           	 		<option value="Lucy">Lucy</option>
+           	 		
+          		</select>
+ -->      		
+          	</div>
+          </div>
+          
+          <div id="users">
+    		<h3>Users/Contacts</h3>
+    		<ul id="userList">
+<!-- 
+    			<li class="user" data-value="" data-name="All"><img src="/greendot.jpg" height="10" width="10"/>&nbsp All</li>
+    			<li class="user" data-value="Jack" data-name="Jack"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Jack</li>
+    			<li class="user" data-value="Lucy" data-name="Lucy"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Lucy</li>
+    			<li class="user" data-value="Jane" data-name="Jane"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Jane</li>
+    			<li class="user" data-value="Stephen" data-name="Stephen"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Stephen</li>
+    			<li class="user" data-value="Lew" data-name="Lew"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Lew</li>
+    			<li class="user" data-value="Bree" data-name="Bree"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Bree</li>
+    			<li class="user" data-value="Mike" data-name="Mike"><img src="/reddot.jpg" height="10" width="10"/>&nbsp Mike</li>
+ -->
+    		</ul>
+    	  </div>
+	</div>
+<!--           <div id="container"/> -->
+  </body>
+
+</html>

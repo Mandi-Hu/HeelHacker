@@ -1,0 +1,90 @@
+body{
+    font-family: "Verdana";
+    text-align: center;
+}
+
+#main {
+    width: 100%;
+    padding: 15px;
+
+}
+
+#chatBox{
+    display: block;
+    clear: left;
+    position: relative;
+    float:left;
+    border: 2px solid black;
+    width: 72%;
+    height: 35em;
+}
+
+#users {
+    display: block;
+    position: relative;
+    float: right;
+    border: 2px solid black;
+    width: 25%;
+    height: 35em;
+    margin-right:10px;
+}
+
+
+#container{
+	margin-left: 10px;
+    height: 79%;
+    border-bottom: 2px solid black;
+    text-align: left;
+    font-size: 30px;
+}
+
+#messageTitle{
+    height:8%;
+    border-bottom: 2px solid black;
+    text-align: left;
+    font-size: 30px;
+    padding:5px;
+    background-color: #616161;
+    color: white;
+}
+
+#username {
+ color: white;
+}
+
+
+#inputSend {
+    padding:10px;
+}
+
+/* 
+#msgtext{
+    display:block;
+    position:absolute;
+    float:left;
+    bottom:0px;
+    vertical-align: bottom;
+    border: 2px solid black;
+    height: 5em;
+    text-align: left;
+}
+ */
+
+
+#userList {
+    list-style: none;
+    text-align: left;
+    font-size: 25px;
+
+}
+
+
+.button {
+    width: 15%;
+    height: 40px;
+    background-color: #0D47A1;
+    color: white;
+}
+
+
+
